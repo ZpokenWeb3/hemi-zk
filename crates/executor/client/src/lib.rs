@@ -31,6 +31,9 @@ pub const CHAIN_ID_OP_MAINNET: u64 = 0xa;
 /// Chain ID for Linea Mainnet.
 pub const CHAIN_ID_LINEA_MAINNET: u64 = 0xe708;
 
+/// Chain ID for Hemi Testnet.
+pub const CHAIN_ID_HEMI_TESTNET: u64 = 0xb56c7;
+
 /// An executor that executes a block inside a zkVM.
 #[derive(Debug, Clone, Default)]
 pub struct ClientExecutor;
@@ -81,6 +84,8 @@ pub enum ChainVariant {
     Optimism,
     /// Linea networks.
     Linea,
+    /// Hemi networks.
+    Hemi,
 }
 
 impl ChainVariant {
@@ -90,6 +95,7 @@ impl ChainVariant {
             ChainVariant::Ethereum => CHAIN_ID_ETH_MAINNET,
             ChainVariant::Optimism => CHAIN_ID_OP_MAINNET,
             ChainVariant::Linea => CHAIN_ID_LINEA_MAINNET,
+            ChainVariant::Hemi => CHAIN_ID_HEMI_TESTNET,
         }
     }
 }
