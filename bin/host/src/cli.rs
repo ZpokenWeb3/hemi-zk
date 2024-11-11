@@ -44,7 +44,7 @@ impl ProviderArgs {
                 let provider: ReqwestProvider<AnyNetwork> =
                     ReqwestProvider::new_http(rpc_url.clone());
                 let chain_id = provider.get_chain_id().await?;
-
+                println!("Chain_id {}", chain_id);
                 (Some(rpc_url), chain_id)
             }
             (None, None) => {
