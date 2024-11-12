@@ -75,6 +75,10 @@ pub struct OptimismVariant;
 #[derive(Debug)]
 pub struct LineaVariant;
 
+/// Implementation for Hemi-specific execution/validation logic.
+#[derive(Debug)]
+pub struct HemiVariant;
+
 /// EVM chain variants that implement different execution/validation rules.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ChainVariant {
@@ -212,6 +216,37 @@ impl Variant for EthereumVariant {
     }
 }
 
+impl Variant for HemiVariant {
+    fn spec() -> ChainSpec {
+        rsp_primitives::chain_spec::hemi_testnet()
+    }
+
+    fn execute<DB>(
+        executor_block_input: &BlockWithSenders,
+        executor_difficulty: U256,
+        cache_db: DB,
+    ) -> eyre::Result<BlockExecutionOutput<Receipt>>
+    where
+        DB: Database<Error: Into<ProviderError> + Display>,
+    {
+        Ok(EthExecutorProvider::new(
+            Self::spec().into(),
+            CustomEvmConfig::from_variant(ChainVariant::Ethereum),
+        )
+            .executor(cache_db)
+            .execute((executor_block_input, executor_difficulty).into())?)
+    }
+
+    fn validate_block_post_execution(
+        block: &BlockWithSenders,
+        chain_spec: &ChainSpec,
+        receipts: &[Receipt],
+        requests: &[Request],
+    ) -> eyre::Result<()> {
+        Ok(validate_block_post_execution_ethereum(block, chain_spec, receipts, requests)?)
+    }
+}
+
 impl Variant for OptimismVariant {
     fn spec() -> ChainSpec {
         rsp_primitives::chain_spec::op_mainnet()
@@ -292,3 +327,4 @@ impl Variant for LineaVariant {
         block
     }
 }
+

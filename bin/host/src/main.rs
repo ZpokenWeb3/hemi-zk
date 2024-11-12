@@ -79,12 +79,13 @@ async fn main() -> eyre::Result<()> {
 
             // Setup the host executor.
             let host_executor = HostExecutor::new(provider);
-
+            println!("Variant {:?}", variant);
             // Execute the host.
             let client_input = host_executor
                 .execute(args.block_number, variant)
                 .await
-                .expect("failed to execute host");
+                .unwrap();
+                // .expect("failed to execute host");
 
             if let Some(cache_dir) = args.cache_dir {
                 let input_folder = cache_dir.join(format!("input/{}", provider_config.chain_id));
@@ -105,48 +106,50 @@ async fn main() -> eyre::Result<()> {
         }
     };
 
-    // Generate the proof.
-    let client = ProverClient::new();
+    println!("ClientInput: {:?}", client_input);
 
-    // Setup the proving key and verification key.
-    let (pk, vk) = client.setup(match variant {
-        ChainVariant::Ethereum => {
-            include_bytes!("../../client-eth/elf/riscv32im-succinct-zkvm-elf")
-        }
-        ChainVariant::Optimism => include_bytes!("../../client-op/elf/riscv32im-succinct-zkvm-elf"),
-        ChainVariant::Linea => include_bytes!("../../client-linea/elf/riscv32im-succinct-zkvm-elf"),
-        // change to hemi client
-        ChainVariant::Hemi => {
-            include_bytes!("../../client-eth/elf/riscv32im-succinct-zkvm-elf")
-        }
-    });
-
-    // Execute the block inside the zkVM.
-    let mut stdin = SP1Stdin::new();
-    let buffer = bincode::serialize(&client_input).unwrap();
-    stdin.write_vec(buffer);
-
-    // Only execute the program.
-    let (mut public_values, execution_report) =
-        client.execute(&pk.elf, stdin.clone()).run().unwrap();
-
-    // Read the block hash.
-    let block_hash = public_values.read::<B256>();
-    println!("success: block_hash={block_hash}");
-
-    // Process the execute report, print it out, and save data to a CSV specified by
-    // report_path.
-    process_execution_report(variant, client_input, execution_report, args.report_path)?;
-
-    if args.prove {
-        // Actually generate the proof. It is strongly recommended you use the network prover
-        // given the size of these programs.
-        println!("Starting proof generation.");
-        let proof = client.prove(&pk, stdin).compressed().run().expect("Proving should work.");
-        println!("Proof generation finished.");
-
-        client.verify(&proof, &vk).expect("proof verification should succeed");
-    }
+    // // Generate the proof.
+    // let client = ProverClient::new();
+    //
+    // // Setup the proving key and verification key.
+    // let (pk, vk) = client.setup(match variant {
+    //     ChainVariant::Ethereum => {
+    //         include_bytes!("../../client-eth/elf/riscv32im-succinct-zkvm-elf")
+    //     }
+    //     ChainVariant::Optimism => include_bytes!("../../client-op/elf/riscv32im-succinct-zkvm-elf"),
+    //     ChainVariant::Linea => include_bytes!("../../client-linea/elf/riscv32im-succinct-zkvm-elf"),
+    //     // change to hemi client
+    //     ChainVariant::Hemi => {
+    //         include_bytes!("../../client-eth/elf/riscv32im-succinct-zkvm-elf")
+    //     }
+    // });
+    //
+    // // Execute the block inside the zkVM.
+    // let mut stdin = SP1Stdin::new();
+    // let buffer = bincode::serialize(&client_input).unwrap();
+    // stdin.write_vec(buffer);
+    //
+    // // Only execute the program.
+    // let (mut public_values, execution_report) =
+    //     client.execute(&pk.elf, stdin.clone()).run().unwrap();
+    //
+    // // Read the block hash.
+    // let block_hash = public_values.read::<B256>();
+    // println!("success: block_hash={block_hash}");
+    //
+    // // Process the execute report, print it out, and save data to a CSV specified by
+    // // report_path.
+    // process_execution_report(variant, client_input, execution_report, args.report_path)?;
+    //
+    // if args.prove {
+    //     // Actually generate the proof. It is strongly recommended you use the network prover
+    //     // given the size of these programs.
+    //     println!("Starting proof generation.");
+    //     let proof = client.prove(&pk, stdin).compressed().run().expect("Proving should work.");
+    //     println!("Proof generation finished.");
+    //
+    //     client.verify(&proof, &vk).expect("proof verification should succeed");
+    // }
 
     Ok(())
 }
