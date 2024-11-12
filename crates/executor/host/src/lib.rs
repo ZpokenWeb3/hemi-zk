@@ -60,7 +60,7 @@ impl<T: Transport + Clone, P: Provider<T, AnyNetwork> + Clone> HostExecutor<T, P
             .await?
             .map(|block| Block::try_from(block.inner))
             .ok_or(eyre!("couldn't fetch block: {}", block_number))??;
-
+        println!("Current block: {:?}", current_block);
         // Setup the spec for the block executor.
         tracing::info!("setting up the spec for the block executor");
         let spec = V::spec();

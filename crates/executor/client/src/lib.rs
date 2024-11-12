@@ -229,9 +229,9 @@ impl Variant for HemiVariant {
     where
         DB: Database<Error: Into<ProviderError> + Display>,
     {
-        Ok(EthExecutorProvider::new(
+        Ok(OpExecutorProvider::new(
             Self::spec().into(),
-            CustomEvmConfig::from_variant(ChainVariant::Ethereum),
+            CustomEvmConfig::from_variant(ChainVariant::Optimism),
         )
             .executor(cache_db)
             .execute((executor_block_input, executor_difficulty).into())?)
@@ -241,9 +241,9 @@ impl Variant for HemiVariant {
         block: &BlockWithSenders,
         chain_spec: &ChainSpec,
         receipts: &[Receipt],
-        requests: &[Request],
+        _requests: &[Request],
     ) -> eyre::Result<()> {
-        Ok(validate_block_post_execution_ethereum(block, chain_spec, receipts, requests)?)
+        Ok(validate_block_post_execution_optimism(block, chain_spec, receipts)?)
     }
 }
 

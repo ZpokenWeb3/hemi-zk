@@ -120,7 +120,7 @@ pub fn hemi_testnet() -> ChainSpec {
     // Spec extracted from:
     //
     // https://github.com/paradigmxyz/reth/blob/c228fe15808c3acbf18dc3af1a03ef5cbdcda07a/crates/chainspec/src/spec.rs#L35-L60
-    let mut spec = ChainSpec {
+    ChainSpec {
         chain: Chain::from_id(743111),
         genesis: Default::default(),
         // We don't need the genesis state. Using default to save cycles.
@@ -129,22 +129,16 @@ pub fn hemi_testnet() -> ChainSpec {
         // For some reasons a state root mismatch error arises if we don't force activate everything
         // before and including Shanghai.
         // may be empty?
-        hardforks: ChainHardforks::new(vec![
-            (EthereumHardfork::Homestead.boxed(), ForkCondition::Block(0)),
-            (EthereumHardfork::Petersburg.boxed(), ForkCondition::Block(0)),
-            (EthereumHardfork::Byzantium.boxed(), ForkCondition::Block(0)),
-            (EthereumHardfork::Constantinople.boxed(), ForkCondition::Block(0)),
-            (EthereumHardfork::Istanbul.boxed(), ForkCondition::Block(0)),
-            (EthereumHardfork::MuirGlacier.boxed(), ForkCondition::Block(0)),
-            (EthereumHardfork::Berlin.boxed(), ForkCondition::Block(0)),
-            (EthereumHardfork::ArrowGlacier.boxed(), ForkCondition::Block(0)),
-            (EthereumHardfork::GrayGlacier.boxed(), ForkCondition::Block(0)),
-        ]),
-        deposit_contract: None,
-        base_fee_params: BaseFeeParamsKind::Constant(BaseFeeParams::ethereum()),
+        hardforks: OptimismHardfork::op_mainnet(),
+        base_fee_params: BaseFeeParamsKind::Variable(
+            vec![
+                (EthereumHardfork::London.boxed(), BaseFeeParams::optimism()),
+                (OptimismHardfork::Canyon.boxed(), BaseFeeParams::optimism_canyon()),
+            ]
+                .into(),
+        ),
         max_gas_limit: ETHEREUM_BLOCK_GAS_LIMIT,
-        prune_delete_limit: 20000,
-    };
-    spec.genesis.config.dao_fork_support = false;
-    spec
+        prune_delete_limit: 10000,
+        ..Default::default()
+    }
 }
