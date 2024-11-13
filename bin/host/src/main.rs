@@ -106,41 +106,41 @@ async fn main() -> eyre::Result<()> {
         }
     };
 
-    println!("ClientInput: {:?}", client_input);
+    println!("Block post executed");
 
     // // Generate the proof.
-    // let client = ProverClient::new();
-    //
-    // // Setup the proving key and verification key.
-    // let (pk, vk) = client.setup(match variant {
-    //     ChainVariant::Ethereum => {
-    //         include_bytes!("../../client-eth/elf/riscv32im-succinct-zkvm-elf")
-    //     }
-    //     ChainVariant::Optimism => include_bytes!("../../client-op/elf/riscv32im-succinct-zkvm-elf"),
-    //     ChainVariant::Linea => include_bytes!("../../client-linea/elf/riscv32im-succinct-zkvm-elf"),
-    //     // change to hemi client
-    //     ChainVariant::Hemi => {
-    //         include_bytes!("../../client-eth/elf/riscv32im-succinct-zkvm-elf")
-    //     }
-    // });
-    //
-    // // Execute the block inside the zkVM.
-    // let mut stdin = SP1Stdin::new();
-    // let buffer = bincode::serialize(&client_input).unwrap();
-    // stdin.write_vec(buffer);
-    //
-    // // Only execute the program.
-    // let (mut public_values, execution_report) =
-    //     client.execute(&pk.elf, stdin.clone()).run().unwrap();
-    //
-    // // Read the block hash.
-    // let block_hash = public_values.read::<B256>();
-    // println!("success: block_hash={block_hash}");
-    //
-    // // Process the execute report, print it out, and save data to a CSV specified by
-    // // report_path.
-    // process_execution_report(variant, client_input, execution_report, args.report_path)?;
-    //
+    let client = ProverClient::new();
+
+    // Setup the proving key and verification key.
+    let (pk, vk) = client.setup(match variant {
+        ChainVariant::Ethereum => {
+            include_bytes!("../../client-eth/elf/riscv32im-succinct-zkvm-elf")
+        }
+        ChainVariant::Optimism => include_bytes!("../../client-op/elf/riscv32im-succinct-zkvm-elf"),
+        ChainVariant::Linea => include_bytes!("../../client-linea/elf/riscv32im-succinct-zkvm-elf"),
+        // change to hemi client
+        ChainVariant::Hemi => {
+            include_bytes!("../../client-hemi/elf/riscv32im-succinct-zkvm-elf")
+        }
+    });
+
+    // Execute the block inside the zkVM.
+    let mut stdin = SP1Stdin::new();
+    let buffer = bincode::serialize(&client_input).unwrap();
+    stdin.write_vec(buffer);
+
+    // Only execute the program.
+    let (mut public_values, execution_report) =
+        client.execute(&pk.elf, stdin.clone()).run().unwrap();
+
+    // Read the block hash.
+    let block_hash = public_values.read::<B256>();
+    println!("success: block_hash={block_hash}");
+
+    // Process the execute report, print it out, and save data to a CSV specified by
+    // report_path.
+    process_execution_report(variant, client_input, execution_report, args.report_path)?;
+
     // if args.prove {
     //     // Actually generate the proof. It is strongly recommended you use the network prover
     //     // given the size of these programs.
