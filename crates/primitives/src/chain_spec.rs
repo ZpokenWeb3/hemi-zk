@@ -149,11 +149,9 @@ pub fn hemi_testnet() -> ChainSpec {
             (OptimismHardfork::Bedrock.boxed(), ForkCondition::Block(0)),
             (OptimismHardfork::Regolith.boxed(), ForkCondition::Timestamp(0)),
             (EthereumHardfork::Shanghai.boxed(), ForkCondition::Timestamp(0)),
-            (OptimismHardfork::Canyon.boxed(), ForkCondition::Timestamp(1704992401)),
-            (EthereumHardfork::Cancun.boxed(), ForkCondition::Timestamp(1706655072)),
-            (OptimismHardfork::Ecotone.boxed(), ForkCondition::Timestamp(1708534800)),
-            // (OptimismHardfork::Fjord.boxed(), ForkCondition::Timestamp(1716998400)),
-            // (OptimismHardfork::Granite.boxed(), ForkCondition::Timestamp(1723478400)),
+            (OptimismHardfork::Canyon.boxed(), ForkCondition::Timestamp(1725868497)),
+            (EthereumHardfork::Cancun.boxed(), ForkCondition::Timestamp(1725868497)),
+            (OptimismHardfork::Ecotone.boxed(), ForkCondition::Timestamp(1725868497)),
         ]),
         base_fee_params: BaseFeeParamsKind::Variable(
             vec![
