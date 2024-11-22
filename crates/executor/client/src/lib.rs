@@ -31,6 +31,9 @@ pub const CHAIN_ID_OP_MAINNET: u64 = 0xa;
 /// Chain ID for Linea Mainnet.
 pub const CHAIN_ID_LINEA_MAINNET: u64 = 0xe708;
 
+/// Chain ID for Hemi Testnet.
+pub const CHAIN_ID_HEMI_TESTNET: u64 = 0xb56c7;
+
 /// An executor that executes a block inside a zkVM.
 #[derive(Debug, Clone, Default)]
 pub struct ClientExecutor;
@@ -72,6 +75,10 @@ pub struct OptimismVariant;
 #[derive(Debug)]
 pub struct LineaVariant;
 
+/// Implementation for Hemi-specific execution/validation logic.
+#[derive(Debug)]
+pub struct HemiVariant;
+
 /// EVM chain variants that implement different execution/validation rules.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ChainVariant {
@@ -81,6 +88,8 @@ pub enum ChainVariant {
     Optimism,
     /// Linea networks.
     Linea,
+    /// Hemi networks.
+    Hemi,
 }
 
 impl ChainVariant {
@@ -90,6 +99,7 @@ impl ChainVariant {
             ChainVariant::Ethereum => CHAIN_ID_ETH_MAINNET,
             ChainVariant::Optimism => CHAIN_ID_OP_MAINNET,
             ChainVariant::Linea => CHAIN_ID_LINEA_MAINNET,
+            ChainVariant::Hemi => CHAIN_ID_HEMI_TESTNET,
         }
     }
 }
@@ -206,6 +216,37 @@ impl Variant for EthereumVariant {
     }
 }
 
+impl Variant for HemiVariant {
+    fn spec() -> ChainSpec {
+        rsp_primitives::chain_spec::hemi_testnet()
+    }
+
+    fn execute<DB>(
+        executor_block_input: &BlockWithSenders,
+        executor_difficulty: U256,
+        cache_db: DB,
+    ) -> eyre::Result<BlockExecutionOutput<Receipt>>
+    where
+        DB: Database<Error: Into<ProviderError> + Display>,
+    {
+        Ok(OpExecutorProvider::new(
+            Self::spec().into(),
+            CustomEvmConfig::from_variant(ChainVariant::Optimism),
+        )
+            .executor(cache_db)
+            .execute((executor_block_input, executor_difficulty).into())?)
+    }
+
+    fn validate_block_post_execution(
+        block: &BlockWithSenders,
+        chain_spec: &ChainSpec,
+        receipts: &[Receipt],
+        _requests: &[Request],
+    ) -> eyre::Result<()> {
+        Ok(validate_block_post_execution_optimism(block, chain_spec, receipts)?)
+    }
+}
+
 impl Variant for OptimismVariant {
     fn spec() -> ChainSpec {
         rsp_primitives::chain_spec::op_mainnet()
@@ -286,3 +327,4 @@ impl Variant for LineaVariant {
         block
     }
 }
+

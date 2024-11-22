@@ -114,3 +114,54 @@ pub fn linea_mainnet() -> ChainSpec {
         ..Default::default()
     }
 }
+
+/// Returns the [ChainSpec] for Hemi testnet.
+pub fn hemi_testnet() -> ChainSpec {
+    // Spec extracted from:
+    //
+    // https://github.com/paradigmxyz/reth/blob/c228fe15808c3acbf18dc3af1a03ef5cbdcda07a/crates/chainspec/src/spec.rs#L35-L60
+    ChainSpec {
+        chain: Chain::from_id(743111),
+        genesis: Default::default(),
+        // We don't need the genesis state. Using default to save cycles.
+        genesis_hash: Some(b256!(
+            "25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9"
+        )),
+        paris_block_and_final_difficulty: Some((0, U256::ZERO)),
+        // For some reasons a state root mismatch error arises if we don't force activate everything
+        // before and including Shanghai.
+        hardforks: ChainHardforks::new(vec![
+            (EthereumHardfork::Frontier.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::Homestead.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::Tangerine.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::SpuriousDragon.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::Byzantium.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::Constantinople.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::Petersburg.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::Istanbul.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::MuirGlacier.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::Berlin.boxed(), ForkCondition::Block(0)),
+            (EthereumHardfork::London.boxed(), ForkCondition::Block(0)),
+            (
+                EthereumHardfork::Paris.boxed(),
+                ForkCondition::TTD { fork_block: Some(0), total_difficulty: U256::ZERO },
+            ),
+            (OptimismHardfork::Bedrock.boxed(), ForkCondition::Block(0)),
+            (OptimismHardfork::Regolith.boxed(), ForkCondition::Timestamp(0)),
+            (EthereumHardfork::Shanghai.boxed(), ForkCondition::Timestamp(0)),
+            (OptimismHardfork::Canyon.boxed(), ForkCondition::Timestamp(1725868497)),
+            (EthereumHardfork::Cancun.boxed(), ForkCondition::Timestamp(1725868497)),
+            (OptimismHardfork::Ecotone.boxed(), ForkCondition::Timestamp(1725868497)),
+        ]),
+        base_fee_params: BaseFeeParamsKind::Variable(
+            vec![
+                (EthereumHardfork::London.boxed(), BaseFeeParams::optimism()),
+                (OptimismHardfork::Canyon.boxed(), BaseFeeParams::optimism_canyon()),
+            ]
+                .into(),
+        ),
+        max_gas_limit: ETHEREUM_BLOCK_GAS_LIMIT,
+        prune_delete_limit: 10000,
+        ..Default::default()
+    }
+}

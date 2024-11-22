@@ -6,9 +6,7 @@ use eyre::{eyre, Ok};
 use reth_execution_types::ExecutionOutcome;
 use reth_primitives::{proofs, Block, Bloom, Receipts, B256};
 use revm::db::CacheDB;
-use rsp_client_executor::{
-    io::ClientExecutorInput, ChainVariant, EthereumVariant, LineaVariant, OptimismVariant, Variant,
-};
+use rsp_client_executor::{io::ClientExecutorInput, ChainVariant, EthereumVariant, LineaVariant, OptimismVariant, Variant, HemiVariant};
 use rsp_mpt::EthereumState;
 use rsp_primitives::account_proof::eip1186_proof_to_account_proof;
 use rsp_rpc_db::RpcDb;
@@ -38,6 +36,7 @@ impl<T: Transport + Clone, P: Provider<T, AnyNetwork> + Clone> HostExecutor<T, P
             ChainVariant::Ethereum => self.execute_variant::<EthereumVariant>(block_number).await,
             ChainVariant::Optimism => self.execute_variant::<OptimismVariant>(block_number).await,
             ChainVariant::Linea => self.execute_variant::<LineaVariant>(block_number).await,
+            ChainVariant::Hemi => self.execute_variant::<HemiVariant>(block_number).await,
         }?;
 
         Ok(client_input)
@@ -61,7 +60,7 @@ impl<T: Transport + Clone, P: Provider<T, AnyNetwork> + Clone> HostExecutor<T, P
             .await?
             .map(|block| Block::try_from(block.inner))
             .ok_or(eyre!("couldn't fetch block: {}", block_number))??;
-
+        tracing::info!("Current block: {}", current_block.number);
         // Setup the spec for the block executor.
         tracing::info!("setting up the spec for the block executor");
         let spec = V::spec();
@@ -163,6 +162,7 @@ impl<T: Transport + Clone, P: Provider<T, AnyNetwork> + Clone> HostExecutor<T, P
             mutated_state.update(&executor_outcome.hash_state_slow());
             mutated_state.state_root()
         };
+
         if state_root != current_block.state_root {
             eyre::bail!("mismatched state root");
         }

@@ -1,0 +1,58 @@
+{
+  "vk": {
+    "commit": {
+      "value": [
+        391559475,
+        1173326164,
+        1357923438,
+        1230839837,
+        1991108994,
+        1891461191,
+        1299042930,
+        545425628
+      ],
+      "_marker": null
+    },
+    "pc_start": 3013864,
+    "chip_information": [
+      [
+        "MemoryProgram",
+        {
+          "log_n": 21,
+          "shift": 1
+        },
+        {
+          "width": 6,
+          "height": 2097152
+        }
+      ],
+      [
+        "Program",
+        {
+          "log_n": 20,
+          "shift": 1
+        },
+        {
+          "width": 37,
+          "height": 1048576
+        }
+      ],
+      [
+        "Byte",
+        {
+          "log_n": 16,
+          "shift": 1
+        },
+        {
+          "width": 11,
+          "height": 65536
+        }
+      ]
+    ],
+    "chip_ordering": {
+      "MemoryProgram": 0,
+      "Program": 1,
+      "Byte": 2
+    }
+  }
+}

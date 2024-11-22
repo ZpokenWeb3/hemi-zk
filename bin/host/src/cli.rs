@@ -14,6 +14,7 @@ pub struct ProviderArgs {
     chain_id: Option<u64>,
 }
 
+#[derive(Clone)]
 pub struct ProviderConfig {
     pub rpc_url: Option<Url>,
     pub chain_id: u64,
@@ -44,7 +45,7 @@ impl ProviderArgs {
                 let provider: ReqwestProvider<AnyNetwork> =
                     ReqwestProvider::new_http(rpc_url.clone());
                 let chain_id = provider.get_chain_id().await?;
-
+                println!("Chain_id {}", chain_id);
                 (Some(rpc_url), chain_id)
             }
             (None, None) => {
