@@ -142,7 +142,14 @@ impl ConfigureEvm for CustomEvmConfig {
                     .append_handler_register(Self::set_precompiles)
                     .build()
             }
-            ChainVariant::Hemi => {
+            ChainVariant::HemiTestnet => {
+                EvmBuilder::default()
+                    .with_db(db)
+                    // add additional precompiles
+                    .append_handler_register(Self::set_precompiles)
+                    .build()
+            }
+            ChainVariant::HemiMainnet => {
                 EvmBuilder::default()
                     .with_db(db)
                     // add additional precompiles
@@ -165,8 +172,8 @@ impl ConfigureEvmEnv for CustomEvmConfig {
                 OptimismEvmConfig::default().fill_tx_env(tx_env, transaction, sender)
             }
             ChainVariant::Linea => EthEvmConfig::default().fill_tx_env(tx_env, transaction, sender),
-            // change ?
-            ChainVariant::Hemi => EthEvmConfig::default().fill_tx_env(tx_env, transaction, sender),
+            ChainVariant::HemiTestnet => EthEvmConfig::default().fill_tx_env(tx_env, transaction, sender),
+            ChainVariant::HemiMainnet => EthEvmConfig::default().fill_tx_env(tx_env, transaction, sender),
         }
     }
 
@@ -190,7 +197,10 @@ impl ConfigureEvmEnv for CustomEvmConfig {
             ChainVariant::Linea => {
                 EthEvmConfig::default().fill_cfg_env(cfg_env, chain_spec, header, total_difficulty)
             }
-            ChainVariant::Hemi => {
+            ChainVariant::HemiTestnet => {
+                EthEvmConfig::default().fill_cfg_env(cfg_env, chain_spec, header, total_difficulty)
+            }
+            ChainVariant::HemiMainnet => {
                 EthEvmConfig::default().fill_cfg_env(cfg_env, chain_spec, header, total_difficulty)
             }
         }
@@ -210,7 +220,9 @@ impl ConfigureEvmEnv for CustomEvmConfig {
                 .fill_tx_env_system_contract_call(env, caller, contract, data),
             ChainVariant::Linea => EthEvmConfig::default()
                 .fill_tx_env_system_contract_call(env, caller, contract, data),
-            ChainVariant::Hemi => EthEvmConfig::default()
+            ChainVariant::HemiTestnet => EthEvmConfig::default()
+                .fill_tx_env_system_contract_call(env, caller, contract, data),
+            ChainVariant::HemiMainnet => EthEvmConfig::default()
                 .fill_tx_env_system_contract_call(env, caller, contract, data),
         }
     }
